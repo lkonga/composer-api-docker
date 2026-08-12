@@ -1,0 +1,28 @@
+diff --git a/local/local-server.ts b/local/local-server.ts
+--- a/local/local-server.ts
++++ b/local/local-server.ts
+@@ -7,6 +7,7 @@
+ import { dirname, resolve } from "node:path";
+ import { fileURLToPath } from "node:url";
+ import { handleLocalOpenAiRequest } from "./local-openai-handler";
+ import type { Deps, Env } from "../worker/types";
++import { errorResponse } from "../worker/http";
+ 
+ const scriptDir = dirname(fileURLToPath(import.meta.url));
+ const repoRoot = resolve(scriptDir, "..");
+@@ -78,11 +79,7 @@
+       const authenticatedRequest = withLocalCursorKey(webRequest);
+       const handled = await handleLocalOpenAiRequest(authenticatedRequest, env, localExecutionContext(), deps);
+       await sendResponse(response, handled);
+     } catch (error) {
+-      const message = error instanceof Error ? error.message : "Unexpected local server error";
+-      await sendResponse(response, Response.json({
+-        error: {
+-          message,
+-          type: "local_server_error",
+-          code: "local_server_error"
+-        }
+-      }, { status: 500 }));
++      await sendResponse(response, errorResponse(error));
+     }
+   });
