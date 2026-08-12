@@ -13,10 +13,11 @@ RUN apt-get update \
 
 WORKDIR /app
 
-# Clone pinned fork = upstream standardagents/composer-api + local/ wrapper
+# Clone pinned fork = upstream standardagents/composer-api + local/ wrapper.
+# Fetch the main branch ref first (GitHub does not allow shallow fetch of a
+# bare SHA), then checkout the pinned commit.
 ARG COMPOSER_API_REF=fbe06a0a6328
-RUN git clone --depth 1 https://github.com/ElCabrii/composer-api-local.git . \
- && git fetch --depth 1 origin "${COMPOSER_API_REF}" \
+RUN git clone --depth 1 --branch main https://github.com/ElCabrii/composer-api-local.git . \
  && git checkout "${COMPOSER_API_REF}"
 
 RUN npm install --no-audit --no-fund
