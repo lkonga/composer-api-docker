@@ -18,25 +18,33 @@ Runtime facts:
 - It is an agent API, not raw inference: no temperature/top_p; Responses API
   rejects `tools` (use chat completions for client tool loops).
 
-## Deploy (Dokploy on g5kc)
+## Deploy status (g5kc / Dokploy)
+
+- Dokploy project `composer-api` (env `production`), compose service `composer-api`
+  (custom git + SSH key deploy from this repo, branch `main`).
+- Container `composer-api`, image `g5kc/composer-api:latest`, maps
+  **loopback `127.0.0.1:8788`** (8787 is taken by portkey-gateway on g5kc).
+- Tailnet: `tailscale serve --bg --https=8788 http://127.0.0.1:8788` →
+  `https://g5kc.tail1e9037.ts.net:8788/v1` (tailnet only).
+- Env in Dokploy: `CURSOR_API_KEY=` (paste the key), `CURSOR_API_PORT=8788`.
+
+## Deploy (from scratch)
 
 1. Dokploy → new Project (e.g. `composer-api`).
-2. Compose app from this repo (`lkonga/composer-api-docker`, branch `main`, path `docker-compose.yml`).
-3. Env: set `CURSOR_API_KEY=crsr_...` (your key).
-4. Port map stays loopback `127.0.0.1:8787`; expose over tailnet:
-   ```
-   tailscale serve --bg https:8787 http://127.0.0.1:8787
-   ```
-   Reachable at `https://g5kc.tail1e9037.ts.net:8787/v1`.
-5. Health: `curl https://g5kc.tail1e9037.ts.net:8787/health`
+2. Compose app from this repo (`lkonga/composer-api-docker`, branch `main`, path `docker-compose.yml`)
+   — use a read-only SSH deploy key: add pubkey to GitHub repo, register in
+   Dokploy, set compose `sourceType=git`, `customGitUrl=git@github.com:lkonga/composer-api-docker.git`,
+   `customGitSSHKeyId=<id>`. (`sourceType=github` requires the Dokploy Github Provider OAuth.)
+3. Env: set `CURSOR_API_KEY=crsr_...` and `CURSOR_API_PORT=8788`.
+4. After deploy: `tailscale serve --bg --https=8788 http://127.0.0.1:8788`.
 
 ## Usage
 
 ```bash
-curl https://g5kc.tail1e9037.ts.net:8787/v1/models \
+curl https://g5kc.tail1e9037.ts.net:8788/v1/models \
   -H "Authorization: Bearer crsr_..."
 
-curl https://g5kc.tail1e9037.ts.net:8787/v1/chat/completions \
+curl https://g5kc.tail1e9037.ts.net:8788/v1/chat/completions \
   -H "Authorization: Bearer crsr_..." -H "Content-Type: application/json" \
   -d '{"model":"composer-2.5","messages":[{"role":"user","content":"Hello"}]}'
 ```
