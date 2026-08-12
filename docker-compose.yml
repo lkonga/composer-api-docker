@@ -5,8 +5,9 @@ services:
     container_name: composer-api
     restart: unless-stopped
     ports:
-      - "127.0.0.1:8787:8787"
+      - "127.0.0.1:8788:8788"
     environment:
       CURSOR_API_KEY: ${CURSOR_API_KEY:-}
+      CURSOR_API_PORT: "8788"
       CURSOR_SDK_BRIDGE_PORT: "8792"
       CURSOR_SDK_BRIDGE_TIMEOUT_MS: "180000"
