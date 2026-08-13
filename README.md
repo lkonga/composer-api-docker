@@ -38,6 +38,17 @@ Runtime facts:
 3. Env: set `CURSOR_API_KEY=crsr_...` and `CURSOR_API_PORT=8788`.
 4. After deploy: `tailscale serve --bg --https=8788 http://127.0.0.1:8788`.
 
+## Verify (after pasting the key + redeploy)
+
+```bash
+CURSOR_API_KEY=crsr_... ./smoke-test.sh
+# or against the loopback endpoint:
+BASE_URL=http://127.0.0.1:8788 CURSOR_API_KEY=crsr_... ./smoke-test.sh
+```
+
+Exits 0 only when `/health` passes AND a real `/v1/chat/completions` round-trip
+returns. Fails with a clear message if the key is missing or the API errors.
+
 ## Usage
 
 ```bash
